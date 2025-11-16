@@ -12,22 +12,13 @@ pipeline {
 
         stage('Construir contenedores') {
             steps {
-
-                // Usamos un bloque PowerShell porque Jenkins está corriendo en Windows
-                // y los comandos "sh" (de Linux) no funcionan aquí.
                 powershell '''
-                    # Intentamos apagar los contenedores si están corriendo
-                    # "docker compose down" detiene y elimina contenedores, redes y volúmenes temporales
-                    # Si no existen contenedores, ocurre un error.
-                    # Gracias a "|| echo ...", evitamos que el pipeline falle si no hay contenedores previos.
-                    docker compose down || echo "No hay contenedores para detener"
+                    Write-Host "Deteniendo contenedores si existen..."
+                    docker compose down -v 2>$null
 
-                    # Construimos nuevamente las imágenes usando nuestro Dockerfile
-                    # "--build" obliga a reconstruir las imágenes desde cero
-                    # "-d" significa "detached mode" → correr los contenedores en segundo plano
+                    Write-Host "Construyendo e iniciando contenedores..."
                     docker compose up --build -d
                 '''
-
             }
         }
 
@@ -40,3 +31,4 @@ pipeline {
 
     }
 }
+
